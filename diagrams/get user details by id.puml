@@ -1,0 +1,27 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+actor "User"
+participant "SecurityFilterChain"
+participant "UserController"
+participant "UserService"
+participant "KeyCloakClient" as client
+participant "UserServiceClient"
+participant "KeyCloak"
+participant "Microservice for\n Users Data"
+
+"User" -> "SecurityFilterChain": GET api/v1/individuals/{individuals_id} \n authorization: Bearer {token}
+"SecurityFilterChain" -> "KeyCloak": валидация токена
+"KeyCloak" -> "SecurityFilterChain": OK
+
+"SecurityFilterChain" -> "UserController": GET api/v1/individuals/{individuals_id} \n authorization: Bearer {token}
+"UserController" -> "UserService": find(String id)
+"UserService" -> "UserServiceClient": find(String id)
+"UserServiceClient" -> "Microservice for\n Users Data": GET api/v1/individuals/{individuals_id}
+"Microservice for\n Users Data" -> "UserServiceClient": IndividualDto
+"UserServiceClient" -> "UserService": IndividualDto
+"UserService" -> "UserController": IndividualDto
+"UserController" -> "User" : IndividualDto
+
+@enduml

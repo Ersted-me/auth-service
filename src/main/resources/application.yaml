@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: auth
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8090/realms/homespace-realm
+            user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            client-id: auth-service-client
+            client-secret: Sa9dfXRicuv96en0Lanfh3yvhLNLik5E
+            scope:
+              - openid
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/homespace-realm
+  jackson:
+    property-naming-strategy: com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy
+
+user-service:
+  client:
+    base-url: http://localhost:8082
+    registration-endpoint: /api/v1/individuals
+    details-endpoint: /api/v1/individuals/%s
+
+keycloak-service:
+  client:
+    base-admin-url: http://localhost:8090/admin/realms/homespace-realm
+server:
+  port: 8081

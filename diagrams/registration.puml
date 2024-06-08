@@ -1,0 +1,36 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+actor "User"
+participant "AuthController"
+participant "AuthService"
+participant "UserService"
+participant "AuthMapper"
+participant "KeyCloakClient" as client
+participant "UserServiceClient"
+participant "KeyCloak"
+participant "Microservice for\n Users Data"
+
+"User" -> "AuthController": POST api/v1/auth/registration \nрегистрация пользователя
+"AuthController" -> "AuthService": save(UserDataForRegistration dto); \nсохранение пользователя
+"AuthService" -> "AuthService": валидация данных
+"AuthService" -> client: registration(UserDataForRegistration dto) \n регистрация пользователя
+client -> "KeyCloak": POST /{realm}/users \n запрос на создание пользователя
+"KeyCloak" -> client: 201 Created
+"AuthService" -> "UserService":
+"UserService" -> "UserServiceClient": create(UserData dto)
+"UserServiceClient" -> "Microservice for\n Users Data": POST api/v1/individuals \nрегистрация individual
+"Microservice for\n Users Data" -> "UserServiceClient": status: 200 \ncontent-type: application\json \nResponseDto
+
+"UserServiceClient" -> "UserService": ResponseDto
+"UserService" -> "AuthService": ResponseDto
+"AuthService" -> client: getToken(UserDataForAuth dto) \n данные для получения токена по кредам пользователя
+client -> "KeyCloak": POST /realms/{realm}/protocol/openid-connect/token \получение токена
+"KeyCloak" -> client: JWT \n возвращает токен
+client -> "AuthService": JWT \n возвращает токен
+"AuthService" -> "AuthMapper": mapToDto(JWT)
+"AuthMapper" -> "AuthService": JWTdto
+"AuthService" -> "AuthController": JWTdto
+"AuthController" -> "User": JWTdto
+@enduml
